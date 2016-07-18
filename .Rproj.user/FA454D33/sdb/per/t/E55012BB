@@ -1,0 +1,17 @@
+{
+    "contents" : "# Author: Christina Bergmann (chbergma 'at' gmail)\n# Last modified: 06.07.2016\n# Description: Read in ABX-generated csv files (shared with this script) and create all necessary columns\n# Analyzing between-/within-speaker discriminability of sound contrasts in the Brent corpus (pre-selected portion based on forced alignments, see paper for details)\n\n# load libraries\nlibrary(plyr)\n\n\n#The acoustic encoding is MEL, change here to to other encodings when available, eg to MFCC (all lowercase)\nacoustic = \"mel\"\n#Which distance measure is used?\ndistance = \"avg\"\n\n\n\n#To be sure that there are no unnecessary comparisons between consonants and vowels, I separated the two. Also faster.\n\nwithinfile_vowels = paste(\"Data/Brent_Clean_withinSpeaker_vowels_\", acoustic, \"_\", distance,\".csv\", sep=\"\")\nbetweenfile_vowels = paste(\"Data/Brent_Clean_acrossSpeaker_vowels_\", acoustic, \"_\", distance,\".csv\", sep=\"\")\n\nwithinfile_cons = paste(\"Data/Brent_Clean_withinSpeaker_cons_\", acoustic, \"_\", distance,\".csv\", sep=\"\")\nbetweenfile_cons = paste(\"Data/Brent_Clean_acrossSpeaker_cons_\", acoustic, \"_\", distance,\".csv\", sep=\"\")\n\n\nread.table(betweenfile_vowels,sep=\"\\t\",header=T)->rawdata_between_temp\nread.table(betweenfile_cons,sep=\"\\t\",header=T)->rawdata_between\nrawdata_between = rbind(rawdata_between, rawdata_between_temp)\n\n\nread.table(withinfile_vowels,sep=\"\\t\",header=T)->rawdata_within_temp\nread.table(withinfile_cons,sep=\"\\t\",header=T)->rawdata_within\nrawdata_within = rbind(rawdata_within, rawdata_within_temp)\n\nremove(rawdata_within_temp, rawdata_between_temp)\n\n\nrawdata_between$contrasts <- as.factor(ifelse((as.character(rawdata_between$phone_1)<as.character(rawdata_between$phone_2)), paste(rawdata_between$phone_1, rawdata_between$phone_2, sep = \"-\"), paste(rawdata_between$phone_2, rawdata_between$phone_1, sep = \"-\")))\nrawdata_between$speakerpairs <- as.factor(ifelse((as.character(rawdata_between$talker_1)<as.character(rawdata_between$talker_2)), paste(rawdata_between$talker_1, rawdata_between$talker_2, sep = \"-\"), paste(rawdata_between$talker_2, rawdata_between$talker_1, sep = \"-\")))\nnames(rawdata_between)[names(rawdata_between)==\"by\"] <- \"context\"\n\nrawdata_within$contrasts <- as.factor(ifelse((as.character(rawdata_within$phone_1)<as.character(rawdata_within$phone_2)), paste(rawdata_within$phone_1, rawdata_within$phone_2, sep = \"-\"), paste(rawdata_within$phone_2, rawdata_within$phone_1, sep = \"-\")))\nrawdata_within$speaker <- as.factor(gsub(\")\", \"\", (gsub(\"^.*?, \",\"\", (gsub(\"^.*?, \",\"\", as.character(rawdata_within$by)))))))\nrawdata_within$context <- as.factor(gsub(\"[(), ]\", \"\", (gsub(\"\\\\d\",\"\", as.character(rawdata_within$by)))))\nrawdata_within <- subset(rawdata_within, select = -c(by))\n\nremove(\"acoustic\", \"betweenfile_cons\", \"betweenfile_vowels\", \"distance\", \"withinfile_cons\", \"withinfile_vowels\")\n",
+    "created" : 1467820980230.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1990171125",
+    "id" : "E55012BB",
+    "lastKnownWriteTime" : 1467886634,
+    "path" : "~/Dropbox/Github/ABX/Brent_Clean/Scripts/ReadIn.R",
+    "project_path" : "Scripts/ReadIn.R",
+    "properties" : {
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "type" : "r_source"
+}
